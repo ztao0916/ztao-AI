@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>张涛的待办事项</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Toast 组件 -->
+    <script src="js/toast.js"></script>
+    <style>
+        .task-item:hover {
+            background-color: rgba(243, 244, 246, 0.8);
+        }
+        .completed-task {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-check-circle text-blue-500 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">张涛的待办事项</h1>
+            </div>
+            <div class="flex space-x-4">
+                <a href="index.html" class="text-blue-600 font-medium flex items-center">
+                    <i class="fas fa-tasks mr-1"></i> 任务列表
+                </a>
+                <a href="categories.html" class="text-gray-600 hover:text-blue-600 flex items-center">
+                    <i class="fas fa-tag mr-1"></i> 分类管理
+                </a>
+                <a href="statistics.html" class="text-gray-600 hover:text-blue-600 flex items-center">
+                    <i class="fas fa-chart-bar mr-1"></i> 统计分析
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- 添加任务区域 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">添加新任务</h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="new-task" placeholder="输入任务内容..." 
+                    class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex gap-2">
+                    <select id="task-category" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">选择分类</option>
+                        <option value="work">工作</option>
+                        <option value="personal">个人</option>
+                        <option value="study">学习</option>
+                    </select>
+                    <button id="add-task-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200">
+                        添加任务
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务过滤和排序 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">筛选：</span>
+                    <select id="filter-status" class="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">全部</option>
+                        <option value="active">进行中</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                    <select id="filter-category" class="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">所有分类</option>
+                        <option value="work">工作</option>
+                        <option value="personal">个人</option>
+                        <option value="study">学习</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">排序：</span>
+                    <select id="sort-by" class="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="date-desc">最新添加</option>
+                        <option value="date-asc">最早添加</option>
+                        <option value="name-asc">按名称 (A-Z)</option>
+                        <option value="name-desc">按名称 (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold mb-4">任务列表</h2>
+            <div id="task-list" class="space-y-2">
+                <!-- 任务项示例 -->
+                <div class="task-item p-3 border border-gray-200 rounded-md flex justify-between items-center hover:shadow-sm transition duration-200">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" class="task-checkbox w-5 h-5 text-blue-500 rounded focus:ring-blue-500">
+                        <span class="task-name">完成产品设计文档</span>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">工作</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-500">截止: 2023-06-30</span>
+                        <a href="task-detail.html?id=1" class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="text-gray-500 hover:text-red-500 delete-task">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="task-item p-3 border border-gray-200 rounded-md flex justify-between items-center hover:shadow-sm transition duration-200">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" class="task-checkbox w-5 h-5 text-blue-500 rounded focus:ring-blue-500" checked>
+                        <span class="task-name completed-task">购买生日礼物</span>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">个人</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-500">截止: 2023-06-25</span>
+                        <a href="task-detail.html?id=2" class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="text-gray-500 hover:text-red-500 delete-task">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="task-item p-3 border border-gray-200 rounded-md flex justify-between items-center hover:shadow-sm transition duration-200">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" class="task-checkbox w-5 h-5 text-blue-500 rounded focus:ring-blue-500">
+                        <span class="task-name">学习JavaScript高级课程</span>
+                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">学习</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-500">截止: 2023-07-15</span>
+                        <a href="task-detail.html?id=3" class="text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="text-gray-500 hover:text-red-500 delete-task">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 空任务提示 -->
+            <div id="empty-task-message" class="hidden text-center py-8">
+                <i class="far fa-clipboard text-gray-300 text-5xl mb-3"></i>
+                <p class="text-gray-500">暂无任务，请添加新任务</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-12 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>© 2023 张涛的待办事项 | 简单高效的任务管理工具</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 初始化任务数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查localStorage中是否有任务数据
+            if (!localStorage.getItem('tasks')) {
+                // 初始化示例任务
+                const initialTasks = [
+                    {
+                        id: 1,
+                        name: '完成产品设计文档',
+                        category: 'work',
+                        completed: false,
+                        dueDate: '2023-06-30',
+                        notes: '包括用户流程图和原型设计'
+                    },
+                    {
+                        id: 2,
+                        name: '购买生日礼物',
+                        category: 'personal',
+                        completed: true,
+                        dueDate: '2023-06-25',
+                        notes: '考虑购买一本书或手表'
+                    },
+                    {
+                        id: 3,
+                        name: '学习JavaScript高级课程',
+                        category: 'study',
+                        completed: false,
+                        dueDate: '2023-07-15',
+                        notes: '重点学习Promise和异步编程'
+                    }
+                ];
+                localStorage.setItem('tasks', JSON.stringify(initialTasks));
+            }
+
+            // 添加任务事件监听
+            document.getElementById('add-task-btn').addEventListener('click', function() {
+                addNewTask();
+            });
+
+            // 回车键添加任务
+            document.getElementById('new-task').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addNewTask();
+                }
+            });
+
+            // 过滤和排序事件监听
+            document.getElementById('filter-status').addEventListener('change', updateTaskList);
+            document.getElementById('filter-category').addEventListener('change', updateTaskList);
+            document.getElementById('sort-by').addEventListener('change', updateTaskList);
+
+            // 初始化任务列表
+            updateTaskList();
+
+            // 为任务复选框添加事件委托
+            document.getElementById('task-list').addEventListener('click', function(e) {
+                if (e.target.classList.contains('task-checkbox')) {
+                    toggleTaskStatus(e.target);
+                }
+                if (e.target.classList.contains('delete-task') || e.target.parentElement.classList.contains('delete-task')) {
+                    const taskItem = e.target.closest('.task-item');
+                    const taskId = taskItem.dataset.id;
+                    deleteTask(taskId);
+                }
+            });
+        });
+
+        // 添加新任务
+        function addNewTask() {
+            const taskInput = document.getElementById('new-task');
+            const categorySelect = document.getElementById('task-category');
+            
+            const taskName = taskInput.value.trim();
+            const category = categorySelect.value;
+            
+            if (taskName === '') {
+                Toast.warning('请输入任务内容');
+                return;
+            }
+
+            // 获取现有任务
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            
+            // 创建新任务
+            const newTask = {
+                id: Date.now(), // 使用时间戳作为唯一ID
+                name: taskName,
+                category: category || 'other',
+                completed: false,
+                dueDate: '',
+                notes: ''
+            };
+            
+            // 添加到任务列表
+            tasks.push(newTask);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // 清空输入框
+            taskInput.value = '';
+            categorySelect.selectedIndex = 0;
+            
+            // 更新任务列表显示
+            updateTaskList();
+            
+            // 显示成功提示
+            Toast.success('任务已添加');
+        }
+
+        // 更新任务列表
+        function updateTaskList() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskList = document.getElementById('task-list');
+            const emptyMessage = document.getElementById('empty-task-message');
+            
+            // 获取过滤和排序条件
+            const statusFilter = document.getElementById('filter-status').value;
+            const categoryFilter = document.getElementById('filter-category').value;
+            const sortBy = document.getElementById('sort-by').value;
+            
+            // 过滤任务
+            let filteredTasks = tasks.filter(task => {
+                // 状态过滤
+                if (statusFilter === 'active' && task.completed) return false;
+                if (statusFilter === 'completed' && !task.completed) return false;
+                
+                // 分类过滤
+                if (categoryFilter !== 'all' && task.category !== categoryFilter) return false;
+                
+                return true;
+            });
+            
+            // 排序任务
+            filteredTasks.sort((a, b) => {
+                switch (sortBy) {
+                    case 'date-asc':
+                        return a.id - b.id;
+                    case 'date-desc':
+                        return b.id - a.id;
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    default:
+                        return b.id - a.id;
+                }
+            });
+            
+            // 清空任务列表
+            taskList.innerHTML = '';
+            
+            // 显示过滤后的任务
+            if (filteredTasks.length === 0) {
+                emptyMessage.classList.remove('hidden');
+            } else {
+                emptyMessage.classList.add('hidden');
+                
+                filteredTasks.forEach(task => {
+                    const taskItem = document.createElement('div');
+                    taskItem.className = 'task-item p-3 border border-gray-200 rounded-md flex justify-between items-center hover:shadow-sm transition duration-200';
+                    taskItem.dataset.id = task.id;
+                    
+                    // 设置分类样式
+                    let categoryClass = '';
+                    let categoryName = '';
+                    
+                    switch (task.category) {
+                        case 'work':
+                            categoryClass = 'bg-blue-100 text-blue-800';
+                            categoryName = '工作';
+                            break;
+                        case 'personal':
+                            categoryClass = 'bg-green-100 text-green-800';
+                            categoryName = '个人';
+                            break;
+                        case 'study':
+                            categoryClass = 'bg-purple-100 text-purple-800';
+                            categoryName = '学习';
+                            break;
+                        default:
+                            categoryClass = 'bg-gray-100 text-gray-800';
+                            categoryName = '其他';
+                    }
+                    
+                    taskItem.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" class="task-checkbox w-5 h-5 text-blue-500 rounded focus:ring-blue-500" ${task.completed ? 'checked' : ''}>
+                            <span class="task-name ${task.completed ? 'completed-task' : ''}">${task.name}</span>
+                            <span class="${categoryClass} text-xs px-2 py-1 rounded">${categoryName}</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            ${task.dueDate ? `<span class="text-sm text-gray-500">截止: ${task.dueDate}</span>` : ''}
+                            <a href="task-detail.html?id=${task.id}" class="text-gray-500 hover:text-blue-500">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="text-gray-500 hover:text-red-500 delete-task">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    taskList.appendChild(taskItem);
+                });
+            }
+        }
+
+        // 切换任务状态
+        function toggleTaskStatus(checkbox) {
+            const taskItem = checkbox.closest('.task-item');
+            const taskId = parseInt(taskItem.dataset.id);
+            const taskName = taskItem.querySelector('.task-name');
+            
+            // 更新UI
+            if (checkbox.checked) {
+                taskName.classList.add('completed-task');
+            } else {
+                taskName.classList.remove('completed-task');
+            }
+            
+            // 更新localStorage中的数据
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskIndex = tasks.findIndex(task => task.id === taskId);
+            
+            if (taskIndex !== -1) {
+                tasks[taskIndex].completed = checkbox.checked;
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+        }
+
+        // 删除任务
+        function deleteTask(taskId) {
+            // 创建确认对话框
+            const confirmDialog = document.createElement('div');
+            confirmDialog.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50';
+            confirmDialog.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+                    <h3 class="text-lg font-semibold mb-4">确认删除</h3>
+                    <p class="text-gray-700 mb-6">确定要删除此任务吗？此操作无法撤销。</p>
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancel-delete" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition duration-200">
+                            取消
+                        </button>
+                        <button id="confirm-delete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition duration-200">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmDialog);
+            
+            // 添加事件监听
+            document.getElementById('cancel-delete').addEventListener('click', function() {
+                document.body.removeChild(confirmDialog);
+            });
+            
+            document.getElementById('confirm-delete').addEventListener('click', function() {
+                // 更新localStorage中的数据
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                const updatedTasks = tasks.filter(task => task.id !== parseInt(taskId));
+                localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+                
+                // 更新UI
+                updateTaskList();
+                
+                // 显示成功提示
+                Toast.success('任务已删除');
+                
+                // 移除对话框
+                document.body.removeChild(confirmDialog);
+            });
+        }
+    </script>
+</body>
+</html> 

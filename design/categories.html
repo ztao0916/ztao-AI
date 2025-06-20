@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类管理 - 张涛的待办事项</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Toast 组件 -->
+    <script src="js/toast.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-check-circle text-blue-500 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">张涛的待办事项</h1>
+            </div>
+            <div class="flex space-x-4">
+                <a href="index.html" class="text-gray-600 hover:text-blue-600 flex items-center">
+                    <i class="fas fa-tasks mr-1"></i> 任务列表
+                </a>
+                <a href="categories.html" class="text-blue-600 font-medium flex items-center">
+                    <i class="fas fa-tag mr-1"></i> 分类管理
+                </a>
+                <a href="statistics.html" class="text-gray-600 hover:text-blue-600 flex items-center">
+                    <i class="fas fa-chart-bar mr-1"></i> 统计分析
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- 添加分类区域 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">添加新分类</h2>
+            <form id="category-form" class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="category-name" placeholder="分类名称" 
+                    class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <div class="flex gap-2">
+                    <div class="relative">
+                        <label for="category-color" class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
+                        <input type="color" id="category-color" value="#3B82F6" 
+                            class="w-full h-10 px-2 py-1 border border-gray-300 rounded-md cursor-pointer">
+                    </div>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200 self-end">
+                        添加分类
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 分类列表 -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold mb-4">分类列表</h2>
+            
+            <!-- 分类表格 -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-gray-700">颜色</th>
+                            <th class="py-3 px-4 text-left text-gray-700">名称</th>
+                            <th class="py-3 px-4 text-left text-gray-700">任务数量</th>
+                            <th class="py-3 px-4 text-left text-gray-700">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categories-list">
+                        <!-- 分类项将通过JavaScript动态添加 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 空分类提示 -->
+            <div id="empty-categories-message" class="hidden text-center py-8">
+                <i class="fas fa-tags text-gray-300 text-5xl mb-3"></i>
+                <p class="text-gray-500">暂无自定义分类，请添加新分类</p>
+            </div>
+        </div>
+        
+        <!-- 分类使用统计 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h2 class="text-lg font-semibold mb-4">分类使用统计</h2>
+            <div id="category-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- 统计卡片将通过JavaScript动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑分类模态框 -->
+    <div id="edit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">编辑分类</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="edit-category-form" class="space-y-4">
+                <input type="hidden" id="edit-category-id">
+                <div>
+                    <label for="edit-category-name" class="block text-sm font-medium text-gray-700 mb-1">分类名称</label>
+                    <input type="text" id="edit-category-name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="edit-category-color" class="block text-sm font-medium text-gray-700 mb-1">分类颜色</label>
+                    <input type="color" id="edit-category-color" class="w-full h-10 px-2 py-1 border border-gray-300 rounded-md cursor-pointer">
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="cancel-edit" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition duration-200">
+                        取消
+                    </button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-200">
+                        保存更改
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-12 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>© 2023 张涛的待办事项 | 简单高效的任务管理工具</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化分类数据
+            if (!localStorage.getItem('categories')) {
+                // 默认分类
+                const defaultCategories = [
+                    { id: 'work', name: '工作', color: '#3B82F6' },
+                    { id: 'personal', name: '个人', color: '#10B981' },
+                    { id: 'study', name: '学习', color: '#8B5CF6' },
+                    { id: 'other', name: '其他', color: '#6B7280' }
+                ];
+                localStorage.setItem('categories', JSON.stringify(defaultCategories));
+            }
+
+            // 添加分类表单提交事件
+            document.getElementById('category-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addCategory();
+            });
+
+            // 关闭模态框事件
+            document.getElementById('close-modal').addEventListener('click', closeEditModal);
+            document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+
+            // 编辑分类表单提交事件
+            document.getElementById('edit-category-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveEditedCategory();
+            });
+
+            // 加载分类列表和统计
+            loadCategories();
+            updateCategoryStats();
+        });
+
+        // 加载分类列表
+        function loadCategories() {
+            const categoriesList = document.getElementById('categories-list');
+            const emptyMessage = document.getElementById('empty-categories-message');
+            
+            // 获取分类数据
+            const categories = JSON.parse(localStorage.getItem('categories')) || [];
+            
+            // 清空列表
+            categoriesList.innerHTML = '';
+            
+            if (categories.length === 0) {
+                emptyMessage.classList.remove('hidden');
+            } else {
+                emptyMessage.classList.add('hidden');
+                
+                // 获取任务数据以计算每个分类的任务数量
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                
+                // 创建分类行
+                categories.forEach(category => {
+                    // 计算该分类的任务数量
+                    const taskCount = tasks.filter(task => task.category === category.id).length;
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'border-b hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="py-3 px-4">
+                            <div class="w-6 h-6 rounded-full" style="background-color: ${category.color}"></div>
+                        </td>
+                        <td class="py-3 px-4">${category.name}</td>
+                        <td class="py-3 px-4">${taskCount}</td>
+                        <td class="py-3 px-4">
+                            <button class="text-blue-500 hover:text-blue-700 mr-3 edit-category" data-id="${category.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-700 delete-category" data-id="${category.id}" ${category.id === 'work' || category.id === 'personal' || category.id === 'study' || category.id === 'other' ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    categoriesList.appendChild(row);
+                });
+                
+                // 添加编辑和删除事件监听
+                document.querySelectorAll('.edit-category').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const categoryId = this.dataset.id;
+                        openEditModal(categoryId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-category').forEach(button => {
+                    button.addEventListener('click', function() {
+                        if (!this.hasAttribute('disabled')) {
+                            const categoryId = this.dataset.id;
+                            deleteCategory(categoryId);
+                        }
+                    });
+                });
+            }
+        }
+
+        // 添加新分类
+        function addCategory() {
+            const nameInput = document.getElementById('category-name');
+            const colorInput = document.getElementById('category-color');
+            
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+            
+            if (name === '') {
+                Toast.warning('请输入分类名称');
+                return;
+            }
+            
+            // 获取现有分类
+            const categories = JSON.parse(localStorage.getItem('categories')) || [];
+            
+            // 检查是否已存在同名分类
+            if (categories.some(cat => cat.name.toLowerCase() === name.toLowerCase())) {
+                Toast.error('已存在同名分类');
+                return;
+            }
+            
+            // 创建新分类ID (使用名称的小写形式，并替换空格为下划线)
+            const id = name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+            
+            // 添加新分类
+            categories.push({
+                id: id,
+                name: name,
+                color: color
+            });
+            
+            // 保存到localStorage
+            localStorage.setItem('categories', JSON.stringify(categories));
+            
+            // 清空输入框
+            nameInput.value = '';
+            colorInput.value = '#3B82F6';
+            
+            // 重新加载分类列表和统计
+            loadCategories();
+            updateCategoryStats();
+            
+            Toast.success('分类已添加');
+        }
+
+        // 打开编辑模态框
+        function openEditModal(categoryId) {
+            const categories = JSON.parse(localStorage.getItem('categories')) || [];
+            const category = categories.find(cat => cat.id === categoryId);
+            
+            if (category) {
+                document.getElementById('edit-category-id').value = category.id;
+                document.getElementById('edit-category-name').value = category.name;
+                document.getElementById('edit-category-color').value = category.color;
+                
+                document.getElementById('edit-modal').classList.remove('hidden');
+            }
+        }
+
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        // 保存编辑后的分类
+        function saveEditedCategory() {
+            const categoryId = document.getElementById('edit-category-id').value;
+            const name = document.getElementById('edit-category-name').value.trim();
+            const color = document.getElementById('edit-category-color').value;
+            
+            if (name === '') {
+                Toast.warning('请输入分类名称');
+                return;
+            }
+            
+            // 获取分类数据
+            const categories = JSON.parse(localStorage.getItem('categories')) || [];
+            const categoryIndex = categories.findIndex(cat => cat.id === categoryId);
+            
+            if (categoryIndex !== -1) {
+                // 检查是否是默认分类
+                const isDefaultCategory = ['work', 'personal', 'study', 'other'].includes(categoryId);
+                
+                // 更新分类
+                categories[categoryIndex] = {
+                    ...categories[categoryIndex],
+                    name: isDefaultCategory ? categories[categoryIndex].name : name, // 默认分类不允许修改名称
+                    color: color
+                };
+                
+                localStorage.setItem('categories', JSON.stringify(categories));
+                
+                // 关闭模态框
+                closeEditModal();
+                
+                // 重新加载分类列表和统计
+                loadCategories();
+                updateCategoryStats();
+                
+                Toast.success('分类已更新');
+            }
+        }
+
+        // 删除分类
+        function deleteCategory(categoryId) {
+            // 默认分类不允许删除
+            if (['work', 'personal', 'study', 'other'].includes(categoryId)) {
+                Toast.error('默认分类不能删除');
+                return;
+            }
+            
+            // 创建确认对话框
+            const confirmDialog = document.createElement('div');
+            confirmDialog.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50';
+            confirmDialog.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                    <h3 class="text-lg font-semibold mb-4">确认删除</h3>
+                    <p class="text-gray-700 mb-6">确定要删除此分类吗？相关任务将被移至"其他"分类。</p>
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancel-delete" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition duration-200">
+                            取消
+                        </button>
+                        <button id="confirm-delete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition duration-200">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmDialog);
+            
+            // 添加事件监听
+            document.getElementById('cancel-delete').addEventListener('click', function() {
+                document.body.removeChild(confirmDialog);
+            });
+            
+            document.getElementById('confirm-delete').addEventListener('click', function() {
+                // 获取分类数据
+                const categories = JSON.parse(localStorage.getItem('categories')) || [];
+                const updatedCategories = categories.filter(cat => cat.id !== categoryId);
+                
+                // 更新任务数据，将该分类的任务移至"其他"分类
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                const updatedTasks = tasks.map(task => {
+                    if (task.category === categoryId) {
+                        return { ...task, category: 'other' };
+                    }
+                    return task;
+                });
+                
+                // 保存更新后的数据
+                localStorage.setItem('categories', JSON.stringify(updatedCategories));
+                localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+                
+                // 重新加载分类列表和统计
+                loadCategories();
+                updateCategoryStats();
+                
+                // 显示成功提示
+                Toast.success('分类已删除');
+                
+                // 移除对话框
+                document.body.removeChild(confirmDialog);
+            });
+        }
+
+        // 更新分类统计
+        function updateCategoryStats() {
+            const statsContainer = document.getElementById('category-stats');
+            
+            // 获取分类和任务数据
+            const categories = JSON.parse(localStorage.getItem('categories')) || [];
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            
+            // 清空统计容器
+            statsContainer.innerHTML = '';
+            
+            // 计算每个分类的任务统计
+            categories.forEach(category => {
+                const categoryTasks = tasks.filter(task => task.category === category.id);
+                const totalTasks = categoryTasks.length;
+                const completedTasks = categoryTasks.filter(task => task.completed).length;
+                const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                
+                // 创建统计卡片
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 border rounded-lg p-4';
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <div class="w-4 h-4 rounded-full mr-2" style="background-color: ${category.color}"></div>
+                        <h3 class="font-medium">${category.name}</h3>
+                    </div>
+                    <div class="text-2xl font-bold mb-1">${totalTasks}</div>
+                    <div class="text-sm text-gray-500 mb-2">总任务数</div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: ${completionRate}%"></div>
+                    </div>
+                    <div class="text-sm text-gray-500">${completedTasks} 已完成 (${completionRate}%)</div>
+                `;
+                
+                statsContainer.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html> 
